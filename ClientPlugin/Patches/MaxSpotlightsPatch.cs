@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace ClientPlugin.Patches
         [HarmonyTargetMethod]
         public static MethodBase Target()
         {
+            // Class is internal, so we can't reference it here directly, instead we'll use reflection.
             return AccessTools.Method("VRage.Render11.LightingStage.MyLightsRendering:CullSpotLights");
         }
     }
@@ -30,10 +32,36 @@ namespace ClientPlugin.Patches
     [HarmonyPatch]
     class RenderSpotlightsPatch
     {
+        /* The max allowed spotlights value is hardcoded, so all we need to do here is find
+         * the instruction that's pushing 32 onto the stack
+        IL_022d: ldloc.2      // num
+        IL_022e: ldc.i4.s     32 // 0x20
+        IL_0230: blt.s        IL_0234
+        */
+
+        const int maxSpotlights = 64; // TODO: Replace this with config value
+
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             foreach (var instruction in instructions)
             {
+                // 
+                if (instruction.opcode == OpCodes.Ldc_I4_S && instruction.operand is int i && i == 32)
+                {
+                    if (maxSpotlights > sbyte.MaxValue)
+                    {
+                        // Can't use Ldc_I4_S for integers bigger than a byte.
+                        yield return new CodeInstruction(OpCodes.Ldc_I4, maxSpotlights);
+                    }
+                    else
+                    {
+                        // We could just  use the new CodeInstruction above, but this retains
+                        // the original compiler micro-optimization. I'm doing this for instructive
+                        // purposes for the future me or anyone else who stumbles across this.
+                        instruction.operand = (sbyte)maxSpotlights;
+                    }
+                }
+
                 yield return instruction;
             }
         }
@@ -41,6 +69,7 @@ namespace ClientPlugin.Patches
         [HarmonyTargetMethod]
         public static MethodBase Target()
         {
+            // Class is internal, so we can't reference it here directly, instead we'll use reflection.
             return AccessTools.Method("VRage.Render11.LightingStage.MyLightsRendering:RenderSpotlights");
         }
 
