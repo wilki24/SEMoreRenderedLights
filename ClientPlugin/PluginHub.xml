@@ -1,22 +1,15 @@
 <?xml version="1.0"?>
 <PluginData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="GitHubPlugin">
-  <Id>TODO: github-user/project-name</Id>
-  <GroupId>TODO: github-user/project-name</GroupId>
-  <FriendlyName>TODO: SeMoreRenderedLights</FriendlyName>
-  <Author>TODO: Author Name</Author>
+  <Id>wilki24/SEMoreRenderedLights</Id>
+  <GroupId>wilki24/SEMoreRenderedLights</GroupId>
+  <FriendlyName>SE More Rendered Lights</FriendlyName>
+  <Author>John Wilkinson</Author>
   <Commit>TODO: Git commit hash</Commit>
   <SourceDirectories>
     <Directory>ClientPlugin</Directory>
   </SourceDirectories>
-  <Tooltip>TODO: Short description</Tooltip>
-  <Description>TODO: Long description, multiple lines.
-
-FriendlyName: How your plugin will show up in the Plugins list.
-
-This text is shown on the right side in the plugin details panel in a scrollable text box.
-
-You can use links here, players can click on them! For example add a Discord invite.
-
-Don't touch the SourceDirectories, unless you rename or consolidate your projects inside the solution.
+  <Tooltip>A plugin for the game Space Engineers, enabling adjustment of the max number of rendered lights. </Tooltip>
+  <Description>
+	  A plugin for the game Space Engineers, enabling adjustment of the max number of rendered lights.
   </Description>
 </PluginData>
