@@ -45,30 +45,19 @@ namespace ClientPlugin.Patches
         {
             Plugin.Instance.Log.Debug($"entering max spotlights transpiler");
 
-            foreach (var instruction in instructions)
-            {
-                // Plugin.Instance.Log.Debug($"opcode: {instruction.opcode.ToString()} - operand: {(instruction.operand != null ? instruction.operand.ToString() : "")}");
+            CodeMatcher matcher = new(instructions);
+            matcher.MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_S, 32))
+                .ThrowIfInvalid("SeMoreRenderedLights could not find the right code sequence.");
 
-                if (instruction.opcode == OpCodes.Ldc_I4_S && instruction.operand is int i && i == 32)
-                {
-                    Plugin.Instance.Log.Debug($"Max number of spotlights now set to : {maxSpotlights.ToString()}");
+            // Can't use Ldc_I4_S for integers bigger than a byte.
+            // We could always use Ldc_I4_S, but this retains the original compiler
+            // micro-optimization. I'm doing this for instructive purposes for
+            // the future me or anyone else who stumbles across this.
+            var oc = maxSpotlights <= sbyte.MaxValue ? OpCodes.Ldc_I4_S : OpCodes.Ldc_I4;
 
-                    if (maxSpotlights > sbyte.MaxValue)
-                    {
-                        // Can't use Ldc_I4_S for integers bigger than a byte.
-                        yield return new CodeInstruction(OpCodes.Ldc_I4, maxSpotlights);
-                    }
-                    else
-                    {
-                        // We could just  use the new CodeInstruction above, but this retains
-                        // the original compiler micro-optimization. I'm doing this for instructive
-                        // purposes for the future me or anyone else who stumbles across this.
-                        instruction.operand = (sbyte)maxSpotlights;
-                    }
-                }
-
-                yield return instruction;
-            }
+            matcher.Set(oc, maxSpotlights);
+  
+            return matcher.Instructions();
         }
 
         [HarmonyTargetMethod]
