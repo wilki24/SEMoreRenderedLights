@@ -24,7 +24,7 @@ namespace ClientPlugin.Patches
         [HarmonyTargetMethod]
         public static MethodBase Target()
         {
-            // Class is internal, so we can't reference it here directly, instead we'll use reflection.
+            // Class is internal, so we can't reference it by type, instead we'll use reflection.
             return AccessTools.Method("VRage.Render11.LightingStage.MyLightsRendering:CullSpotLights");
         }
     }
@@ -63,7 +63,7 @@ namespace ClientPlugin.Patches
         [HarmonyTargetMethod]
         public static MethodBase Target()
         {
-            // Class is internal, so we can't reference it here directly, instead we'll use reflection.
+            // Class is internal, so we can't reference it by type, instead we'll use reflection.
             return AccessTools.Method("VRage.Render11.LightingStage.MyLightsRendering:RenderSpotlights");
         }
 
