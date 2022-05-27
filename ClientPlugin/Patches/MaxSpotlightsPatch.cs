@@ -43,11 +43,16 @@ namespace ClientPlugin.Patches
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
+            Plugin.Instance.Log.Debug($"entering max spotlights transpiler");
+
             foreach (var instruction in instructions)
             {
-                // 
+                // Plugin.Instance.Log.Debug($"opcode: {instruction.opcode.ToString()} - operand: {(instruction.operand != null ? instruction.operand.ToString() : "")}");
+
                 if (instruction.opcode == OpCodes.Ldc_I4_S && instruction.operand is int i && i == 32)
                 {
+                    Plugin.Instance.Log.Debug($"Max number of spotlights now set to : {maxSpotlights.ToString()}");
+
                     if (maxSpotlights > sbyte.MaxValue)
                     {
                         // Can't use Ldc_I4_S for integers bigger than a byte.
