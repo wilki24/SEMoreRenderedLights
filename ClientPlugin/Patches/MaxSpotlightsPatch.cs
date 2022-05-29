@@ -39,7 +39,7 @@ namespace ClientPlugin.Patches
         IL_0230: blt.s        IL_0234
         */
 
-        const int maxSpotlights = 64; // TODO: Replace this with config value
+        const int maxSpotlights = 1024; // TODO: Replace this with config value
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -49,14 +49,14 @@ namespace ClientPlugin.Patches
             // the future me or anyone else who stumbles across this.
             var isSByte = maxSpotlights <= sbyte.MaxValue;
             var oc = isSByte ? OpCodes.Ldc_I4_S : OpCodes.Ldc_I4;
-            var op = isSByte ? (sbyte)maxSpotlights : maxSpotlights;
+            var op = isSByte ? unchecked((sbyte)maxSpotlights) : maxSpotlights;
 
             CodeMatcher matcher = new(instructions);
             matcher.MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_S, (sbyte)32));
             
             if (matcher.IsValid)
             {
-                Plugin.Instance.Log.Info($"Max number of spotlights is now: {maxSpotlights}");
+                Plugin.Instance.Log.Info($"Max number of spotlights set. oc:{oc} op:{op}");
                 matcher.Set(oc, op);
                 return matcher.Instructions();
             }
