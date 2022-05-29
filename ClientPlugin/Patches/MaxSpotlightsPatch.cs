@@ -43,21 +43,26 @@ namespace ClientPlugin.Patches
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            Plugin.Instance.Log.Debug($"entering max spotlights transpiler");
-
-            CodeMatcher matcher = new(instructions);
-            matcher.MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_S, 32))
-                .ThrowIfInvalid("SeMoreRenderedLights could not find the right code sequence.");
-
             // Can't use Ldc_I4_S for integers bigger than a byte.
             // We could always use Ldc_I4_S, but this retains the original compiler
             // micro-optimization. I'm doing this for instructive purposes for
             // the future me or anyone else who stumbles across this.
-            var oc = maxSpotlights <= sbyte.MaxValue ? OpCodes.Ldc_I4_S : OpCodes.Ldc_I4;
+            var isSByte = maxSpotlights <= sbyte.MaxValue;
+            var oc = isSByte ? OpCodes.Ldc_I4_S : OpCodes.Ldc_I4;
+            var op = isSByte ? (sbyte)maxSpotlights : maxSpotlights;
 
-            matcher.Set(oc, maxSpotlights);
-  
-            return matcher.Instructions();
+            CodeMatcher matcher = new(instructions);
+            matcher.MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_S, (sbyte)32));
+            
+            if (matcher.IsValid)
+            {
+                Plugin.Instance.Log.Info($"Max number of spotlights is now: {maxSpotlights}");
+                matcher.Set(oc, op);
+                return matcher.Instructions();
+            }
+            
+            Plugin.Instance.Log.Warning($"Couldn't find the right place to modify the number of spotlights.");
+            return instructions;
         }
 
         [HarmonyTargetMethod]
